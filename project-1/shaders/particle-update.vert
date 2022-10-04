@@ -6,7 +6,7 @@ uniform float uDeltaTime;
 
 /* Inputs. These reflect the state of a single particle before the update. */
 
-
+attribute vec2 spawnPosition;
 attribute vec2 vPosition;              // actual position
 attribute float vAge;                  // actual age (in seconds)
 attribute float vLife;                 // when it is supposed to dye 
@@ -35,6 +35,7 @@ void main() {
    vPositionOut = vPosition + vVelocity * uDeltaTime;
    vAgeOut = vAge + uDeltaTime;
    vLifeOut = vLife;
+
 
    vec2 accel = vec2(0.0);
    vVelocityOut = vVelocity + accel * uDeltaTime;

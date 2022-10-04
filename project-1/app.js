@@ -192,7 +192,7 @@ function main(shaders)
         const vAge = gl.getAttribLocation(updateProgram, "vAge");
         const vLife = gl.getAttribLocation(updateProgram, "vLife");
         const vVelocity = gl.getAttribLocation(updateProgram, "vVelocity");
-
+ 
         gl.bindBuffer(gl.ARRAY_BUFFER, inParticlesBuffer);
         
         gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 24, 0);
