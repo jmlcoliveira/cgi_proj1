@@ -7,12 +7,18 @@ let inParticlesBuffer, outParticlesBuffer, quadBuffer;
 // Particle system constants
 
 // Total number of particles
-const N_PARTICLES = 100000;
+const N_PARTICLES = 1000000;
 
 let drawPoints = true;
 let drawField = true;
 
 let time = undefined;
+
+let minLife = 2;
+let maxLife = 10;
+
+let minSpeed = 0.1;
+let maxSpeed = 0.2;
 
 function main(shaders)
 {
@@ -51,8 +57,18 @@ function main(shaders)
         console.log(event.key);
         switch(event.key) {
             case "PageUp":
+                if(event.shiftKey) {
+                    minSpeed++;
+                } else {
+                    maxSpeed++;
+                }
                 break;
             case "PageDown":
+                if(event.shiftKey) {
+                    minSpeed--;
+                } else {
+                    maxSpeed--;
+                }
                 break;
             case "ArrowUp":
                 break;
@@ -63,12 +79,24 @@ function main(shaders)
             case "ArrowRight":
                 break;
             case 'q':
+                if(minLife<19 && minLife<=maxLife){
+                    minLife++;
+                }
                 break;
             case 'a':
+                if(minLife>1 && minLife<=maxLife){
+                    minLife--;
+                }
                 break;
             case 'w':
+                if(maxLife<20 && minLife<=maxLife){
+                    maxLife++;
+                }
                 break;
             case 's':
+                if(maxLife>2 && minLife<=maxLife){
+                     maxLife--;
+                }
                 break;
             case '0':
                 drawField = !drawField;
@@ -91,10 +119,9 @@ function main(shaders)
         if(event.shiftKey) {
             gl.useProgram(updateProgram);
             gl.uniform2fv(spawnPosition, p);
-            console.log(event.shiftKey);
         }
         
-        console.log(p);
+        //console.log(p);
     });
 
     canvas.addEventListener("mouseup", function(event) {
@@ -102,8 +129,6 @@ function main(shaders)
 
     
     function getCursorPosition(canvas, event) {
-  
-       
         const mx = event.offsetX;
         const my = event.offsetY;
 
@@ -130,8 +155,8 @@ function main(shaders)
 
         for(let i=0; i<nParticles; ++i) {
             // position
-            const x = 2.0*Math.random()-1;
-            const y = 2.0*Math.random()-1;
+            let x = 2.0*Math.random()-1;
+            let y = 2.0*Math.random()-1;
 
             data.push(x); data.push(y);
             
@@ -139,12 +164,18 @@ function main(shaders)
             data.push(0.0);
 
             // life
-            const life = 6.0 + Math.random();
+            const life = randomNumBetween(minLife, maxLife);
+            //console.log(life);
+
             data.push(life);
 
             // velocity
-            data.push(0.1*(Math.random()-0.5));
-            data.push(0.1*(Math.random()-0.5));
+            let angle = Math.random()*Math.PI*2;
+            let r = Math.random()*0.5;//randomNumBetween(minSpeed,maxS);
+            data.push(0.1*Math.cos(angle)*r);
+            data.push(0.2*Math.sin(angle)*r);
+
+            //data.push(Math.random());
         }
 
         inParticlesBuffer = gl.createBuffer();
@@ -158,7 +189,6 @@ function main(shaders)
         gl.bindBuffer(gl.ARRAY_BUFFER, outParticlesBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, flatten(data), gl.STREAM_DRAW);
     }
-
 
 
     function animate(timestamp)
@@ -190,11 +220,17 @@ function main(shaders)
     {
         // Setup uniforms
         const uDeltaTime = gl.getUniformLocation(updateProgram, "uDeltaTime");
+        const uMaxLife = gl.getUniformLocation(updateProgram, "uMaxLife");
+        const uMinLife = gl.getUniformLocation(updateProgram, "uMinLife");
+        const uRand = gl.getUniformLocation(updateProgram, "uRand");
         
         gl.useProgram(updateProgram);
 
         gl.uniform1f(uDeltaTime, deltaTime);
-        
+        gl.uniform1f(uMaxLife, maxLife);
+        gl.uniform1f(uMinLife, minLife);
+        gl.uniform1f(uRand, Math.random());
+
         // Setup attributes
         const vPosition = gl.getAttribLocation(updateProgram, "vPosition");
         const vAge = gl.getAttribLocation(updateProgram, "vAge");
@@ -257,6 +293,10 @@ function main(shaders)
         gl.enableVertexAttribArray(vPosition);
 
         gl.drawArrays(gl.POINTS, 0, nParticles);
+    }
+
+    function randomNumBetween(min, max) {
+        return Math.random()*(max-min) + min;
     }
 }
 

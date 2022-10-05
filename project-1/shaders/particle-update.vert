@@ -1,14 +1,16 @@
 precision mediump float;
 
-const float PI = 3.14159265;
-
 /* Number of seconds (possibly fractional) that has passed since the last
    update step. */
 uniform float uDeltaTime;
 
 /* Inputs. These reflect the state of a single particle before the update. */
+const float pi = 3.1415;
 
 uniform vec2 spawnPosition;
+uniform float uMaxLife;
+uniform float uMinLife;
+uniform float uRand;
 
 attribute vec2 vPosition;              // actual position
 attribute float vAge;                  // actual age (in seconds)
@@ -32,6 +34,13 @@ highp float rand(vec2 co)
     return fract(sin(sn) * c);
 }
 
+/*vec2 calcCircleSpawnPos(vec2 center, float radius) 
+{
+     float ang = uRand * pi * 2.0;
+     float r = radius * sqrt(rand(vec2(uDeltaTime,uDeltaTime)));
+     return vec2(center.x + r*cos(ang), center.y + r*sin(ang));
+}*/
+
 void main() {
 
    /* Update parameters according to our simple rules.*/
@@ -39,13 +48,12 @@ void main() {
    vAgeOut = vAge + uDeltaTime;
    vLifeOut = vLife;
 
-
    vec2 accel = vec2(0.0);
    vVelocityOut = vVelocity + accel * uDeltaTime;
       
    if (vAgeOut >= vLife) {
       vPositionOut = spawnPosition;
+      vLifeOut = rand(vec2(uDeltaTime, vAge)) * (uMaxLife-uMinLife) + uMinLife;
       vAgeOut = 0.0;
    }
-
 }
