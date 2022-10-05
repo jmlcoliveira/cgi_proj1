@@ -1,12 +1,15 @@
 precision mediump float;
 
+const float PI = 3.14159265;
+
 /* Number of seconds (possibly fractional) that has passed since the last
    update step. */
 uniform float uDeltaTime;
 
 /* Inputs. These reflect the state of a single particle before the update. */
 
-attribute vec2 spawnPosition;
+uniform vec2 spawnPosition;
+
 attribute vec2 vPosition;              // actual position
 attribute float vAge;                  // actual age (in seconds)
 attribute float vLife;                 // when it is supposed to dye 
@@ -41,7 +44,8 @@ void main() {
    vVelocityOut = vVelocity + accel * uDeltaTime;
       
    if (vAgeOut >= vLife) {
-      // It's all up to you!
+      vPositionOut = spawnPosition;
+      vAgeOut = 0.0;
    }
 
 }

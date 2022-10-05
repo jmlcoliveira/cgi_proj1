@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from '../../libs/utils.js';
-import { vec2, flatten, subtract, dot } from '../../libs/MV.js';
+import { vec2, flatten, subtract, dot} from '../../libs/MV.js';
 
 // Buffers: particles before update, particles after update, quad vertices
 let inParticlesBuffer, outParticlesBuffer, quadBuffer;
@@ -7,7 +7,7 @@ let inParticlesBuffer, outParticlesBuffer, quadBuffer;
 // Particle system constants
 
 // Total number of particles
-const N_PARTICLES = 1000;
+const N_PARTICLES = 100000;
 
 let drawPoints = true;
 let drawField = true;
@@ -77,6 +77,7 @@ function main(shaders)
                 drawPoints  = !drawPoints;
                 break; 
             case 'Shift':
+                break;
         }
     })
     
@@ -85,7 +86,14 @@ function main(shaders)
 
     canvas.addEventListener("mousemove", function(event) {
         const p = getCursorPosition(canvas, event);
+        const spawnPosition = gl.getUniformLocation(updateProgram, "spawnPosition");
 
+        if(event.shiftKey) {
+            gl.useProgram(updateProgram);
+            gl.uniform2fv(spawnPosition, p);
+            console.log(event.shiftKey);
+        }
+        
         console.log(p);
     });
 
@@ -122,8 +130,8 @@ function main(shaders)
 
         for(let i=0; i<nParticles; ++i) {
             // position
-            const x = Math.random()-0.5;
-            const y = Math.random()-0.5;
+            const x = 2.0*Math.random()-1;
+            const y = 2.0*Math.random()-1;
 
             data.push(x); data.push(y);
             
