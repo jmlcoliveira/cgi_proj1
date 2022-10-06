@@ -5,11 +5,13 @@ precision mediump float;
 uniform float uDeltaTime;
 
 /* Inputs. These reflect the state of a single particle before the update. */
-const float pi = 3.1415;
+const float pi = 3.14159265359;
 
 uniform vec2 spawnPosition;
 uniform float uMaxLife;
 uniform float uMinLife;
+uniform float uMaxVelocity;
+uniform float uMinVelocity;
 uniform float uRand;
 
 attribute vec2 vPosition;              // actual position
@@ -41,6 +43,7 @@ highp float rand(vec2 co)
      return vec2(center.x + r*cos(ang), center.y + r*sin(ang));
 }*/
 
+
 void main() {
 
    /* Update parameters according to our simple rules.*/
@@ -53,7 +56,12 @@ void main() {
       
    if (vAgeOut >= vLife) {
       vPositionOut = spawnPosition;
-      vLifeOut = rand(vec2(uDeltaTime, vAge)) * (uMaxLife-uMinLife) + uMinLife;
+      vLifeOut = /*randomNumBetween(uMinLife, uMaxLife);*/rand(vec2(uDeltaTime, vLife)) * (uMaxLife-uMinLife) + uMinLife;
       vAgeOut = 0.0;
+
+      float angle = atan(vVelocity.x, vVelocity.y);
+      float vel = rand(vec2(uDeltaTime, vVelocity)) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
+      vVelocityOut.x = 0.5*vel*cos(angle);//rand(vec2(uDeltaTime, vVelocity.x)) * (uMaxVelocity - uMinVelocity) + uMinVelocity;
+      vVelocityOut.y = vel*sin(angle);
    }
 }
