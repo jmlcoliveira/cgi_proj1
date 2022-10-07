@@ -7,7 +7,9 @@ let inParticlesBuffer, outParticlesBuffer, quadBuffer;
 // Particle system constants
 
 // Total number of particles
-const N_PARTICLES = 1000000;
+const N_PARTICLES = 100000;
+const xScale = 1.5;
+let yScale = 0.0;
 
 let drawPoints = true;
 let drawField = true;
@@ -23,6 +25,7 @@ let maxVelocity = 0.2;
 let velocityAngle = 0.0;
 let fluxAngle = Math.PI;
 
+
 function main(shaders)
 {
     // Generate the canvas element to fill the entire page
@@ -31,6 +34,7 @@ function main(shaders)
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    yScale = xScale * canvas.height/canvas.width;
 
     /** type {WebGL2RenderingContext} */
     const gl = setupWebGL(canvas, {alpha: true});
@@ -53,6 +57,7 @@ function main(shaders)
     window.addEventListener("resize", function(event) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        yScale = xScale * canvas.height/canvas.width;
         gl.viewport(0,0,canvas.width, canvas.height);
     });
 
@@ -124,9 +129,10 @@ function main(shaders)
     });
 
     canvas.addEventListener("mousemove", function(event) {
-        const p = getCursorPosition(canvas, event);
+        let p = getCursorPosition(canvas, event);
         const spawnPosition = gl.getUniformLocation(updateProgram, "spawnPosition");
-
+        p[0] = p[0]*xScale;
+        p[1] = p[1]*yScale;
         if(event.shiftKey) {
             gl.useProgram(updateProgram);
             gl.uniform2fv(spawnPosition, p);
@@ -166,8 +172,8 @@ function main(shaders)
 
         for(let i=0; i<nParticles; ++i) {
             // position
-            let x = 2.0*Math.random()-1;
-            let y = 2.0*Math.random()-1;
+            let x = (2.0*Math.random()-1)*xScale;
+            let y = (2.0*Math.random()-1)*yScale;
 
             data.push(x); data.push(y);
             
@@ -282,7 +288,7 @@ function main(shaders)
     }
 
     function drawQuad() {
-
+       
         gl.useProgram(fieldProgram);
 
         // Setup attributes
@@ -297,8 +303,11 @@ function main(shaders)
 
     function drawParticles(buffer, nParticles)
     {
+        const uScale = gl.getUniformLocation(renderProgram, "uScale");
 
         gl.useProgram(renderProgram);
+
+        gl.uniform2fv(uScale, vec2(xScale, yScale));
 
         // Setup attributes
         const vPosition = gl.getAttribLocation(renderProgram, "vPosition");
