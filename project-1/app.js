@@ -7,7 +7,7 @@ let inParticlesBuffer, outParticlesBuffer, quadBuffer;
 // Particle system constants
 
 // Total number of particles
-const N_PARTICLES = 100000;
+const N_PARTICLES = 1000000;
 const xScale = 1.5;
 let yScale = 0.0;
 
