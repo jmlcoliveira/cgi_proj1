@@ -65,20 +65,20 @@ function main(shaders)
         console.log(event.key);
         switch(event.key) {
             case "PageUp":
-                if(event.shiftKey && minVelocity<maxVelocity) {
-                    minVelocity = minVelocity + 0.1;
+                if(event.shiftKey && minVelocity+0.01<maxVelocity) {
+                    minVelocity +=  0.01;
                     console.log("minV: %f", minVelocity)
-                } else if(!event.shiftKey && minVelocity<=maxVelocity) {
-                    maxVelocity = maxVelocity + 0.1;
+                } else if(!event.shiftKey && minVelocity<maxVelocity+0.01) {
+                    maxVelocity += 0.01;
                     console.log("maxV: %f", maxVelocity)
                 }
                 break;
             case "PageDown":
-                if(event.shiftKey && minVelocity<=maxVelocity) {
-                    minVelocity = minVelocity - 0.1;
+                if(event.shiftKey && minVelocity-0.01<maxVelocity && minVelocity>=0.02) {
+                    minVelocity -= 0.01;
                     console.log("minV: %f", minVelocity)
-                } else if(!event.shiftKey && minVelocity<maxVelocity) {
-                    maxVelocity = maxVelocity - 0.1;
+                } else if(!event.shiftKey && minVelocity<maxVelocity-0.01 && maxVelocity>=0.02) {
+                    maxVelocity -= 0.01;
                     console.log("maxV: %f", maxVelocity)
                 }
                 break;
@@ -97,8 +97,10 @@ function main(shaders)
                 console.log(fluxAngle);
                 break;
             case "ArrowLeft":
+                velocityAngle += 0.05;
                 break;
             case "ArrowRight":
+                velocityAngle += 0.05;
                 break;
             case 'q':
                 if(minLife<19 && minLife<maxLife){

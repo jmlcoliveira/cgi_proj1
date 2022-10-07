@@ -54,7 +54,7 @@ void main() {
 
       float angle = (2.0*rand( vVelocity * uDeltaTime) * uFluxAngle) - uFluxAngle;//(atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
       float vel = rand(vPosition* vVelocity * uDeltaTime) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
-      vVelocityOut.x = vel*cos(angle);
-      vVelocityOut.y = vel*sin(angle);
+      vVelocityOut.x = vel*cos(angle + uVelocityAngle);
+      vVelocityOut.y = vel*sin(angle + uVelocityAngle);
    }
 }
