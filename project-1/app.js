@@ -83,8 +83,18 @@ function main(shaders)
                 }
                 break;
             case "ArrowUp":
+                if(fluxAngle < Math.PI)
+                    fluxAngle += 0.05;
+                else
+                    fluxAngle = Math.PI;
+                console.log(fluxAngle);
                 break;
             case "ArrowDown":
+                if(fluxAngle > -Math.PI)
+                    fluxAngle -= 0.05;
+                else
+                    fluxAngle = -Math.PI;
+                console.log(fluxAngle);
                 break;
             case "ArrowLeft":
                 break;
@@ -151,7 +161,6 @@ function main(shaders)
 
         const x = ((mx / canvas.width * 2) - 1);
         const y = (((canvas.height - my)/canvas.height * 2) -1);
-
         return vec2(x,y);
     }
 

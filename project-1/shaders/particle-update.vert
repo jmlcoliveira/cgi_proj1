@@ -37,14 +37,6 @@ highp float rand(vec2 co)
     return fract(sin(sn) * c);
 }
 
-/*vec2 calcCircleSpawnPos(vec2 center, float radius) 
-{
-     float ang = uRand * pi * 2.0;
-     float r = radius * sqrt(rand(vec2(uDeltaTime,uDeltaTime)));
-     return vec2(center.x + r*cos(ang), center.y + r*sin(ang));
-}*/
-
-
 void main() {
 
    /* Update parameters according to our simple rules.*/
@@ -57,12 +49,12 @@ void main() {
       
    if (vAgeOut > vLife) {
       vPositionOut = spawnPosition;
-      vLifeOut = /*randomNumBetween(uMinLife, uMaxLife);*/rand(vec2(uDeltaTime, vLife)) * (uMaxLife-uMinLife) + uMinLife;
+      vLifeOut = rand(vec2(uDeltaTime, vLife)) * (uMaxLife-uMinLife) + uMinLife;
       vAgeOut = 0.0;
 
-      float angle = atan(vVelocity.x, vVelocity.y);
-      float vel = rand(vec2(uDeltaTime, vVelocity)) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
-      vVelocityOut.x = vel*cos(angle);//rand(vec2(uDeltaTime, vVelocity.x)) * (uMaxVelocity - uMinVelocity) + uMinVelocity;
+      float angle = (atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
+      float vel = rand(vec2(vPosition* vVelocity)) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
+      vVelocityOut.x = vel*cos(angle);
       vVelocityOut.y = vel*sin(angle);
    }
 }
