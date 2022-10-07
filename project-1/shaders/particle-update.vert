@@ -49,11 +49,11 @@ void main() {
       
    if (vAgeOut > vLife) {
       vPositionOut = spawnPosition;
-      vLifeOut = rand(vec2(uDeltaTime, vLife)) * (uMaxLife-uMinLife) + uMinLife;
+      vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
       vAgeOut = 0.0;
 
       float angle = (atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
-      float vel = rand(vec2(vPosition* vVelocity)) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
+      float vel = rand(vPosition* vVelocity) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
       vVelocityOut.x = vel*cos(angle);
       vVelocityOut.y = vel*sin(angle);
    }
