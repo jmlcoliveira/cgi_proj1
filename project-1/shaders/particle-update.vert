@@ -12,7 +12,8 @@ uniform float uMaxLife;
 uniform float uMinLife;
 uniform float uMaxVelocity;
 uniform float uMinVelocity;
-uniform float uRand;
+uniform float uVelocityAngle;
+uniform float uFluxAngle;
 
 attribute vec2 vPosition;              // actual position
 attribute float vAge;                  // actual age (in seconds)

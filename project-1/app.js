@@ -20,6 +20,9 @@ let maxLife = 10;
 let minVelocity = 0.1;
 let maxVelocity = 0.2;
 
+let velocityAngle = 0.0;
+let fluxAngle = Math.PI;
+
 function main(shaders)
 {
     // Generate the canvas element to fill the entire page
@@ -183,7 +186,6 @@ function main(shaders)
             data.push(0.5*v*Math.cos(angle));
             data.push(v*Math.sin(angle));
 
-            //data.push(Math.random());
         }
 
         inParticlesBuffer = gl.createBuffer();
@@ -232,7 +234,8 @@ function main(shaders)
         const uMinLife = gl.getUniformLocation(updateProgram, "uMinLife");
         const uMaxVelocity = gl.getUniformLocation(updateProgram, "uMaxVelocity");
         const uMinVelocity = gl.getUniformLocation(updateProgram, "uMinVelocity");
-        const uRand = gl.getUniformLocation(updateProgram, "uRand");
+        const uVelocityAngle = gl.getUniformLocation(updateProgram, "uVelocityAngle");
+        const uFluxAngle = gl.getUniformLocation(updateProgram, "uFluxAngle");
         
         gl.useProgram(updateProgram);
 
@@ -241,7 +244,8 @@ function main(shaders)
         gl.uniform1f(uMinLife, minLife);
         gl.uniform1f(uMaxVelocity, maxVelocity);
         gl.uniform1f(uMinVelocity, minVelocity);
-        gl.uniform1f(uRand, Math.random());
+        gl.uniform1f(uVelocityAngle, velocityAngle);
+        gl.uniform1f(uFluxAngle, fluxAngle);
 
         // Setup attributes
         const vPosition = gl.getAttribLocation(updateProgram, "vPosition");
