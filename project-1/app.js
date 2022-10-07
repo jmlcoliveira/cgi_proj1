@@ -17,8 +17,11 @@ let time = undefined;
 let minLife = 2;
 let maxLife = 10;
 
-let minSpeed = 0.1;
-let maxSpeed = 0.2;
+let minVelocity = 0.1;
+let maxVelocity = 0.2;
+
+let velocityAngle = 0.0;
+let fluxAngle = Math.PI;
 
 function main(shaders)
 {
@@ -57,17 +60,21 @@ function main(shaders)
         console.log(event.key);
         switch(event.key) {
             case "PageUp":
-                if(event.shiftKey) {
-                    minSpeed++;
-                } else {
-                    maxSpeed++;
+                if(event.shiftKey && minVelocity<maxVelocity) {
+                    minVelocity = minVelocity + 0.1;
+                    console.log("minV: %f", minVelocity)
+                } else if(!event.shiftKey && minVelocity<=maxVelocity) {
+                    maxVelocity = maxVelocity + 0.1;
+                    console.log("maxV: %f", maxVelocity)
                 }
                 break;
             case "PageDown":
-                if(event.shiftKey) {
-                    minSpeed--;
-                } else {
-                    maxSpeed--;
+                if(event.shiftKey && minVelocity<=maxVelocity) {
+                    minVelocity = minVelocity - 0.1;
+                    console.log("minV: %f", minVelocity)
+                } else if(!event.shiftKey && minVelocity<maxVelocity) {
+                    maxVelocity = maxVelocity - 0.1;
+                    console.log("maxV: %f", maxVelocity)
                 }
                 break;
             case "ArrowUp":
@@ -79,23 +86,27 @@ function main(shaders)
             case "ArrowRight":
                 break;
             case 'q':
-                if(minLife<19 && minLife<=maxLife){
+                if(minLife<19 && minLife<maxLife){
                     minLife++;
+                    console.log(minLife)
                 }
                 break;
             case 'a':
                 if(minLife>1 && minLife<=maxLife){
                     minLife--;
+                    console.log(minLife)
                 }
                 break;
             case 'w':
                 if(maxLife<20 && minLife<=maxLife){
                     maxLife++;
+                    console.log(maxLife)
                 }
                 break;
             case 's':
-                if(maxLife>2 && minLife<=maxLife){
+                if(maxLife>2 && minLife<maxLife){
                      maxLife--;
+                     console.log(maxLife)
                 }
                 break;
             case '0':
@@ -171,11 +182,10 @@ function main(shaders)
 
             // velocity
             let angle = Math.random()*Math.PI*2;
-            let v = /*Math.random()*0.5;*/randomNumBetween(minSpeed,maxSpeed);
+            let v = randomNumBetween(minVelocity,maxVelocity);
             data.push(0.5*v*Math.cos(angle));
             data.push(v*Math.sin(angle));
 
-            //data.push(Math.random());
         }
 
         inParticlesBuffer = gl.createBuffer();
@@ -222,14 +232,20 @@ function main(shaders)
         const uDeltaTime = gl.getUniformLocation(updateProgram, "uDeltaTime");
         const uMaxLife = gl.getUniformLocation(updateProgram, "uMaxLife");
         const uMinLife = gl.getUniformLocation(updateProgram, "uMinLife");
-        const uRand = gl.getUniformLocation(updateProgram, "uRand");
+        const uMaxVelocity = gl.getUniformLocation(updateProgram, "uMaxVelocity");
+        const uMinVelocity = gl.getUniformLocation(updateProgram, "uMinVelocity");
+        const uVelocityAngle = gl.getUniformLocation(updateProgram, "uVelocityAngle");
+        const uFluxAngle = gl.getUniformLocation(updateProgram, "uFluxAngle");
         
         gl.useProgram(updateProgram);
 
         gl.uniform1f(uDeltaTime, deltaTime);
         gl.uniform1f(uMaxLife, maxLife);
         gl.uniform1f(uMinLife, minLife);
-        gl.uniform1f(uRand, Math.random());
+        gl.uniform1f(uMaxVelocity, maxVelocity);
+        gl.uniform1f(uMinVelocity, minVelocity);
+        gl.uniform1f(uVelocityAngle, velocityAngle);
+        gl.uniform1f(uFluxAngle, fluxAngle);
 
         // Setup attributes
         const vPosition = gl.getAttribLocation(updateProgram, "vPosition");

@@ -11,5 +11,5 @@ void main() {
   gl_PointSize = 2.0;
   gl_Position = vec4(vPosition, 0.0, 1.0);
   
-  fLeft = 1.0 - vAge/vLife;
+  fLeft = vAge/vLife;
 }
