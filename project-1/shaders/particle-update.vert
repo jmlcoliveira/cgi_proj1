@@ -52,8 +52,8 @@ void main() {
       vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
       vAgeOut = 0.0;
 
-      float angle = (atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
-      float vel = rand(vPosition* vVelocity) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
+      float angle = (2.0*rand( vVelocity * uDeltaTime) * uFluxAngle) - uFluxAngle;//(atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
+      float vel = rand(vPosition* vVelocity * uDeltaTime) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
       vVelocityOut.x = vel*cos(angle);
       vVelocityOut.y = vel*sin(angle);
    }

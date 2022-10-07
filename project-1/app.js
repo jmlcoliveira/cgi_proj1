@@ -198,7 +198,7 @@ function main(shaders)
             // velocity
             let angle = Math.random()*Math.PI*2;
             let v = randomNumBetween(minVelocity,maxVelocity);
-            data.push(0.5*v*Math.cos(angle));
+            data.push(v*Math.cos(angle));
             data.push(v*Math.sin(angle));
 
         }
