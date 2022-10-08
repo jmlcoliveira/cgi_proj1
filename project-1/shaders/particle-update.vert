@@ -6,6 +6,7 @@ uniform float uDeltaTime;
 
 /* Inputs. These reflect the state of a single particle before the update. */
 const float pi = 3.14159265359;
+const float g = 0.0000000000667;
 
 uniform vec2 spawnPosition;
 uniform float uMaxLife;

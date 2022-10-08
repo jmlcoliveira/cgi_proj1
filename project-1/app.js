@@ -2,7 +2,7 @@ import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from '../../
 import { vec2, flatten, subtract, dot} from '../../libs/MV.js';
 
 // Buffers: particles before update, particles after update, quad vertices
-let inParticlesBuffer, outParticlesBuffer, quadBuffer;
+let inParticlesBuffer, outParticlesBuffer, quadBuffer, planetBuffer;
 
 // Particle system constants
 
@@ -24,6 +24,13 @@ let maxVelocity = 0.2;
 
 let velocityAngle = 0.0;
 let fluxAngle = Math.PI;
+
+const MAX_PLANETS = 10;
+let currentPlanets = 0;
+let newPlanet = [];
+let mouseDown = 0;
+let planets = [];
+const N_VERTICES = 10000;
 
 
 function main(shaders)
@@ -50,6 +57,8 @@ function main(shaders)
     // Enable Alpha blending
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); 
+
+    //planetBuffer = gl.createBuffer();
 
     buildQuad();
     buildParticleSystem(N_PARTICLES);
@@ -87,20 +96,18 @@ function main(shaders)
                     fluxAngle += 0.05;
                 else
                     fluxAngle = Math.PI;
-                console.log(fluxAngle);
                 break;
             case "ArrowDown":
                 if(fluxAngle > -Math.PI)
                     fluxAngle -= 0.05;
                 else
                     fluxAngle = -Math.PI;
-                console.log(fluxAngle);
                 break;
             case "ArrowLeft":
                 velocityAngle += 0.05;
                 break;
             case "ArrowRight":
-                velocityAngle += 0.05;
+                velocityAngle -= 0.05;
                 break;
             case 'q':
                 if(minLife<19 && minLife<maxLife){
@@ -138,6 +145,13 @@ function main(shaders)
     })
     
     canvas.addEventListener("mousedown", function(event) {
+        /*if(currentPlanets < maxPlanets){
+            let p = getCursorPosition(canvas, event);
+            p[0] = p[0]*xScale;
+            p[1] = p[1]*yScale;
+            newPlanet.push(p);
+            mouseDown = 1;
+        }*/
     });
 
     canvas.addEventListener("mousemove", function(event) {
@@ -149,11 +163,29 @@ function main(shaders)
             gl.useProgram(updateProgram);
             gl.uniform2fv(spawnPosition, p);
         }
-        
-        //console.log(p);
+        /*if(mouseDown == 1){
+            newPlanet[3] = p[0];
+            newPlanet[4] = p[1];
+        }*/
     });
 
     canvas.addEventListener("mouseup", function(event) {
+        mouseDown = 0;
+        /*if(currentPlanets < maxPlanets){
+            let p = getCursorPosition(canvas, event);
+            p[0] = p[0]*xScale;
+            p[1] = p[1]*yScale;
+            newPlanet[2] = p[0];
+            newPlanet[3] = p[1];
+
+            let r = Math.sqrt(Math.pow(newPlanet[1] - newPlanet[0], 2) + Math.pow(newPlanet[3] - newPlanet[2], 2));
+            for(let i = 0; i < N_VERTICES; i++){
+                let angle = 2.0*Math.PI*i/N_VERTICES;
+                planets.push(vec2(r*Math.cos(angle), r*Math.sin(angle)));
+            }
+            currentPlanets++;
+            drawPlanets(planetBuffer, N_VERTICES * currentPlanets);
+        }*/
     })
 
     
@@ -193,7 +225,6 @@ function main(shaders)
 
             // life
             const life = randomNumBetween(minLife, maxLife);
-            //console.log(life);
 
             data.push(life);
 
@@ -239,6 +270,7 @@ function main(shaders)
         if(drawField) drawQuad();
         updateParticles(deltaTime);
         if(drawPoints) drawParticles(outParticlesBuffer, N_PARTICLES);
+        //drawPlanets(planetBuffer, N_VERTICES * currentPlanets);
 
         swapParticlesBuffers();
     }
@@ -329,6 +361,18 @@ function main(shaders)
         gl.enableVertexAttribArray(vPosition);
 
         gl.drawArrays(gl.POINTS, 0, nParticles);
+    }
+
+    function drawPlanets(buffer, nPlanets){
+        // gl.useProgram(fieldProgram);
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+        // const vPosition = gl.getAttribLocation(fieldProgram, "vPosition");
+
+        // gl.bufferData(gl.ARRAY_BUFFER, flatten(planets), gl.STATIC_DRAW);
+        // gl.vertexAttribPointer(vPosition, 1, gl.FLOAT, false, 0, 0);
+        // gl.drawArrays(gl.LINE_LOOP, 0, nPlanets*N_VERTICES);
     }
 
     function randomNumBetween(min, max) {
