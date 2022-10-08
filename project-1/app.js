@@ -27,10 +27,9 @@ let fluxAngle = Math.PI;
 
 const MAX_PLANETS = 10;
 let currentPlanets = 0;
-let newPlanet = [];
 let mouseDown = 0;
-let planets = [];
-const N_VERTICES = 10000;
+let planetsPos = [];
+let planetsR = [];
 
 
 function main(shaders)
@@ -145,13 +144,14 @@ function main(shaders)
     })
     
     canvas.addEventListener("mousedown", function(event) {
-        /*if(currentPlanets < maxPlanets){
+        if(currentPlanets < MAX_PLANETS){
             let p = getCursorPosition(canvas, event);
             p[0] = p[0]*xScale;
             p[1] = p[1]*yScale;
-            newPlanet.push(p);
+            planetsPos.push(p);
+
             mouseDown = 1;
-        }*/
+        }
     });
 
     canvas.addEventListener("mousemove", function(event) {
@@ -163,30 +163,39 @@ function main(shaders)
             gl.useProgram(updateProgram);
             gl.uniform2fv(spawnPosition, p);
         }
-        /*if(mouseDown == 1){
-            newPlanet[3] = p[0];
-            newPlanet[4] = p[1];
-        }*/
+        if(mouseDown == 1 && currentPlanets < MAX_PLANETS){
+            let r = Math.sqrt(Math.pow(planetsPos[currentPlanets][1] - p[1], 2) + Math.pow(planetsPos[currentPlanets][0] - p[0], 2));
+            if(r != undefined) 
+                planetsR[currentPlanets] = r;
+        }
     });
 
     canvas.addEventListener("mouseup", function(event) {
         mouseDown = 0;
-        /*if(currentPlanets < maxPlanets){
+        if(currentPlanets < MAX_PLANETS){
+            console.log(planetsPos[currentPlanets]);
+            console.log(planetsR[currentPlanets]);
+            currentPlanets++;
+
+        }
+        /*
+        if(currentPlanets < MAX_PLANETS){
             let p = getCursorPosition(canvas, event);
             p[0] = p[0]*xScale;
             p[1] = p[1]*yScale;
             newPlanet[2] = p[0];
             newPlanet[3] = p[1];
 
+            
             let r = Math.sqrt(Math.pow(newPlanet[1] - newPlanet[0], 2) + Math.pow(newPlanet[3] - newPlanet[2], 2));
             for(let i = 0; i < N_VERTICES; i++){
                 let angle = 2.0*Math.PI*i/N_VERTICES;
                 planets.push(vec2(r*Math.cos(angle), r*Math.sin(angle)));
             }
-            currentPlanets++;
-            drawPlanets(planetBuffer, N_VERTICES * currentPlanets);
-        }*/
-    })
+            */
+            //drawPlanets(planetBuffer, N_VERTICES * currentPlanets);
+        }
+    )
 
     
     function getCursorPosition(canvas, event) {
@@ -332,7 +341,20 @@ function main(shaders)
 
     function drawQuad() {
        
+
+        const uScale = gl.getUniformLocation(fieldProgram, "uScale");
+
         gl.useProgram(fieldProgram);
+
+        gl.uniform2fv(uScale, vec2(xScale, yScale));
+
+        for(let i=0; i<MAX_PLANETS; i++) {
+            const uPlanetsPos = gl.getUniformLocation(fieldProgram, "uPlanetsPos[" + i + "]");
+            const uPlanetsR = gl.getUniformLocation(fieldProgram, "uPlanetsR[" + i + "]");
+
+            gl.uniform2fv(uPlanetsPos, planetsPos);
+            gl.uniform1fv(uPlanetsR, planetsR);
+        }
 
         // Setup attributes
         const vPosition = gl.getAttribLocation(fieldProgram, "vPosition"); 
@@ -362,19 +384,20 @@ function main(shaders)
 
         gl.drawArrays(gl.POINTS, 0, nParticles);
     }
-
+/*
     function drawPlanets(buffer, nPlanets){
-        // gl.useProgram(fieldProgram);
+         gl.useProgram(fieldProgram);
 
-        // gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
-        // const vPosition = gl.getAttribLocation(fieldProgram, "vPosition");
+         const vPosition = gl.getAttribLocation(fieldProgram, "vPosition");
+         const vRadius = gl.getAttribLocation(fieldProgram, "vRadius");
 
-        // gl.bufferData(gl.ARRAY_BUFFER, flatten(planets), gl.STATIC_DRAW);
-        // gl.vertexAttribPointer(vPosition, 1, gl.FLOAT, false, 0, 0);
-        // gl.drawArrays(gl.LINE_LOOP, 0, nPlanets*N_VERTICES);
+         gl.bufferData(gl.ARRAY_BUFFER, flatten(planets), gl.STATIC_DRAW);
+         gl.vertexAttribPointer(vPosition, 1, gl.FLOAT, false, 0, 0);
+         gl.drawArrays(gl.LINE_LOOP, 0, nPlanets);
     }
-
+*/
     function randomNumBetween(min, max) {
         return Math.random()*(max-min) + min;
     }
