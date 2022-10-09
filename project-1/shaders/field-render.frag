@@ -23,6 +23,8 @@ vec3 hsv2rgb(vec3 c)
 void main() {
     vec2 finalForce = vec2(0.0, 0.0);
     highp int index = int(fCurrentPlanets);
+    bool temp = false;
+
     for(int i=0; i<MAX_PLANETS; i++) {
         if(i >= index) break;
         float m2 = (4.0 * pi * pow(fPlanetsR[i]*Rc, 3.0) * p) / 3.0;
@@ -31,8 +33,14 @@ void main() {
         float angle = atan(fPlanetsPos[i].y - fPosition.y, fPlanetsPos[i].x - fPosition.x);
         vec2 currentForce = vec2(force*cos(angle), force*sin(angle));
         finalForce += currentForce;
+
+        if(mod(fPlanetsR[i], 5.0) == 0.0)
+            temp = true;
     }
     float finalAngle = atan(finalForce.y, finalForce.x);
     float finalForceIntensity = finalForce.x*cos(finalAngle) + finalForce.y*sin(finalAngle);
+    if(mod(log(finalForceIntensity), 1.1) >= 0.0 && mod(log(finalForceIntensity), 1.1) <= 0.15) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    } else
     gl_FragColor = vec4(hsv2rgb(vec3(finalAngle/(2.0*pi), 1.0, 1.0)), mix(0.0, 1.0, abs(finalForceIntensity)/10000000000000.0));
 }
