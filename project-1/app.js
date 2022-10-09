@@ -2,7 +2,7 @@ import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from '../../
 import { vec2, flatten, subtract, dot} from '../../libs/MV.js';
 
 // Buffers: particles before update, particles after update, quad vertices
-let inParticlesBuffer, outParticlesBuffer, quadBuffer, planetBuffer;
+let inParticlesBuffer, outParticlesBuffer, quadBuffer;
 
 // Particle system constants
 
@@ -149,7 +149,6 @@ function main(shaders)
             p[0] = p[0]*xScale;
             p[1] = p[1]*yScale;
             planetsPos.push(p);
-
             mouseDown = 1;
         }
     });
@@ -173,10 +172,12 @@ function main(shaders)
     canvas.addEventListener("mouseup", function(event) {
         mouseDown = 0;
         if(currentPlanets < MAX_PLANETS){
+            let p = getCursorPosition(canvas, event);
             console.log(planetsPos[currentPlanets]);
-            console.log(planetsR[currentPlanets]);
+            let r = Math.sqrt(Math.pow(planetsPos[currentPlanets][1] - p[1], 2) + Math.pow(planetsPos[currentPlanets][0] - p[0], 2));
+            if(r != undefined) 
+                planetsR[currentPlanets] = r;
             currentPlanets++;
-
         }
         /*
         if(currentPlanets < MAX_PLANETS){
@@ -294,7 +295,8 @@ function main(shaders)
         const uMinVelocity = gl.getUniformLocation(updateProgram, "uMinVelocity");
         const uVelocityAngle = gl.getUniformLocation(updateProgram, "uVelocityAngle");
         const uFluxAngle = gl.getUniformLocation(updateProgram, "uFluxAngle");
-        
+        const uCurrentPlanets = gl.getUniformLocation(updateProgram, "uCurrentPlanets");
+
         gl.useProgram(updateProgram);
 
         gl.uniform1f(uDeltaTime, deltaTime);
@@ -304,6 +306,14 @@ function main(shaders)
         gl.uniform1f(uMinVelocity, minVelocity);
         gl.uniform1f(uVelocityAngle, velocityAngle);
         gl.uniform1f(uFluxAngle, fluxAngle);
+        gl.uniform1f(uCurrentPlanets, currentPlanets)
+
+        for(let i=0; i<currentPlanets; i++) {
+            const uPlanetsPos = gl.getUniformLocation(updateProgram, "uPlanetsPos[" + i + "]");
+            const uPlanetsR = gl.getUniformLocation(updateProgram, "uPlanetsR[" + i + "]");
+            gl.uniform2fv(uPlanetsPos, planetsPos[i]);
+            gl.uniform1f(uPlanetsR, planetsR[i]);
+        }
 
         // Setup attributes
         const vPosition = gl.getAttribLocation(updateProgram, "vPosition");
@@ -341,19 +351,19 @@ function main(shaders)
 
     function drawQuad() {
        
-
         const uScale = gl.getUniformLocation(fieldProgram, "uScale");
+        const uCurrentPlanets = gl.getUniformLocation(fieldProgram, "uCurrentPlanets");
 
         gl.useProgram(fieldProgram);
 
         gl.uniform2fv(uScale, vec2(xScale, yScale));
+        gl.uniform1f(uCurrentPlanets, currentPlanets)
 
-        for(let i=0; i<MAX_PLANETS; i++) {
+        for(let i=0; i<currentPlanets+1; i++) {
             const uPlanetsPos = gl.getUniformLocation(fieldProgram, "uPlanetsPos[" + i + "]");
             const uPlanetsR = gl.getUniformLocation(fieldProgram, "uPlanetsR[" + i + "]");
-
-            gl.uniform2fv(uPlanetsPos, planetsPos);
-            gl.uniform1fv(uPlanetsR, planetsR);
+            gl.uniform2fv(uPlanetsPos, planetsPos, i);
+            gl.uniform1f(uPlanetsR, planetsR, i);
         }
 
         // Setup attributes

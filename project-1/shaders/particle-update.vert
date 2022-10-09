@@ -5,8 +5,16 @@ precision mediump float;
 uniform float uDeltaTime;
 
 /* Inputs. These reflect the state of a single particle before the update. */
+const int MAX_PLANETS = 10;
 const float pi = 3.14159265359;
 const float g = 0.0000000000667;
+const float p = 5510.0;
+const float Rc = 6371000.0;
+const float m1 = 1.0;
+
+uniform vec2 uPlanetsPos[MAX_PLANETS];
+uniform float uPlanetsR[MAX_PLANETS];
+uniform float uCurrentPlanets; 
 
 uniform vec2 spawnPosition;
 uniform float uMaxLife;
@@ -45,7 +53,19 @@ void main() {
    vAgeOut = vAge + uDeltaTime;
    vLifeOut = vLife;
 
-   vec2 accel = vec2(0.0);
+   vec2 finalForce = vec2(0.0, 0.0);
+    highp int index = int(uCurrentPlanets);
+    for(int i=0; i<MAX_PLANETS; i++) {
+        if(i >= index) break;
+        float m2 = (4.0 * pi * pow(uPlanetsR[i]*Rc, 3.0) * p) / 3.0;
+        float dist = sqrt(pow(uPlanetsPos[i].x - vPosition.x, 2.0) + pow(uPlanetsPos[i].y - vPosition.y, 2.0)) * Rc;
+        float force = (g * m1 * m2) / pow(dist, 2.0);
+        force = force/300.0;
+        float angle = atan(uPlanetsPos[i].y - vPosition.y, uPlanetsPos[i].x - vPosition.x);
+        finalForce += vec2(force*cos(angle), force*sin(angle)); //*(atan(fPlanetsPos[i].x, fPlanetsPos[i].y)/pi);
+    }
+
+   vec2 accel = finalForce*m1;
    vVelocityOut = vVelocity + accel * uDeltaTime;
       
    if (vAgeOut > vLife) {
