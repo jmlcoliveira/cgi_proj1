@@ -359,11 +359,11 @@ function main(shaders)
         gl.uniform2fv(uScale, vec2(xScale, yScale));
         gl.uniform1f(uCurrentPlanets, currentPlanets)
 
-        for(let i=0; i<currentPlanets+1; i++) {
+        for(let i=0; i<currentPlanets; i++) {
             const uPlanetsPos = gl.getUniformLocation(fieldProgram, "uPlanetsPos[" + i + "]");
             const uPlanetsR = gl.getUniformLocation(fieldProgram, "uPlanetsR[" + i + "]");
-            gl.uniform2fv(uPlanetsPos, planetsPos, i);
-            gl.uniform1f(uPlanetsR, planetsR, i);
+            gl.uniform2fv(uPlanetsPos, planetsPos[i]);
+            gl.uniform1f(uPlanetsR, planetsR[i]);
         }
 
         // Setup attributes
