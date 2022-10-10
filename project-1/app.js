@@ -150,6 +150,10 @@ function main(shaders)
             p[1] = p[1]*yScale;
             planetsPos.push(p);
             mouseDown = 1;
+            let r = Math.sqrt(Math.pow(planetsPos[currentPlanets][1] - p[1], 2) + Math.pow(planetsPos[currentPlanets][0] - p[0], 2));
+            if(r != undefined) 
+                planetsR[currentPlanets] = r;
+            currentPlanets++;
         }
     });
 
@@ -162,39 +166,15 @@ function main(shaders)
             gl.useProgram(updateProgram);
             gl.uniform2fv(spawnPosition, p);
         }
-        if(mouseDown == 1 && currentPlanets < MAX_PLANETS){
-            let r = Math.sqrt(Math.pow(planetsPos[currentPlanets][1] - p[1], 2) + Math.pow(planetsPos[currentPlanets][0] - p[0], 2));
+        if(mouseDown == 1 && currentPlanets-1 < MAX_PLANETS){
+            let r = Math.sqrt(Math.pow(planetsPos[currentPlanets-1][1] - p[1], 2) + Math.pow(planetsPos[currentPlanets-1][0] - p[0], 2));
             if(r != undefined) 
-                planetsR[currentPlanets] = r;
+                planetsR[currentPlanets-1] = r;
         }
     });
 
     canvas.addEventListener("mouseup", function(event) {
         mouseDown = 0;
-        if(currentPlanets < MAX_PLANETS){
-            let p = getCursorPosition(canvas, event);
-            console.log(planetsPos[currentPlanets]);
-            let r = Math.sqrt(Math.pow(planetsPos[currentPlanets][1] - p[1], 2) + Math.pow(planetsPos[currentPlanets][0] - p[0], 2));
-            if(r != undefined) 
-                planetsR[currentPlanets] = r;
-            currentPlanets++;
-        }
-        /*
-        if(currentPlanets < MAX_PLANETS){
-            let p = getCursorPosition(canvas, event);
-            p[0] = p[0]*xScale;
-            p[1] = p[1]*yScale;
-            newPlanet[2] = p[0];
-            newPlanet[3] = p[1];
-
-            
-            let r = Math.sqrt(Math.pow(newPlanet[1] - newPlanet[0], 2) + Math.pow(newPlanet[3] - newPlanet[2], 2));
-            for(let i = 0; i < N_VERTICES; i++){
-                let angle = 2.0*Math.PI*i/N_VERTICES;
-                planets.push(vec2(r*Math.cos(angle), r*Math.sin(angle)));
-            }
-            */
-            //drawPlanets(planetBuffer, N_VERTICES * currentPlanets);
         }
     )
 
