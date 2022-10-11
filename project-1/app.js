@@ -8,6 +8,13 @@ let inParticlesBuffer, outParticlesBuffer, quadBuffer;
 
 // Total number of particles
 const N_PARTICLES = 1000000;
+const MIN_MAXLIFE = 2;
+const MAX_MAXLIFE = 20;
+const MIN_MINLIFE = 1;
+const MAX_MINLIFE = 19;
+const VELOCITY_INCREMENT = 0.01;
+const FLUX_INCREMENT = 0.02;
+const ANGLE_INCREMENT = 0.05;
 const xScale = 1.5;
 let yScale = 0.0;
 
@@ -73,61 +80,61 @@ function main(shaders)
         console.log(event.key);
         switch(event.key) {
             case "PageUp":
-                if(event.shiftKey && minVelocity+0.01<maxVelocity) {
-                    minVelocity +=  0.01;
+                if(event.shiftKey && minVelocity+VELOCITY_INCREMENT<maxVelocity) {
+                    minVelocity +=  VELOCITY_INCREMENT;
                     console.log("minV: %f", minVelocity)
-                } else if(!event.shiftKey && minVelocity<maxVelocity+0.01) {
-                    maxVelocity += 0.01;
+                } else if(!event.shiftKey) {
+                    maxVelocity += VELOCITY_INCREMENT;
                     console.log("maxV: %f", maxVelocity)
                 }
                 break;
             case "PageDown":
-                if(event.shiftKey && minVelocity-0.01<maxVelocity && minVelocity>=0.02) {
-                    minVelocity -= 0.01;
+                if(event.shiftKey && minVelocity>=VELOCITY_INCREMENT) {
+                    minVelocity -= VELOCITY_INCREMENT;
                     console.log("minV: %f", minVelocity)
-                } else if(!event.shiftKey && minVelocity<maxVelocity-0.01 && maxVelocity>=0.02) {
-                    maxVelocity -= 0.01;
+                } else if(!event.shiftKey && minVelocity<maxVelocity-VELOCITY_INCREMENT) {
+                    maxVelocity -= VELOCITY_INCREMENT;
                     console.log("maxV: %f", maxVelocity)
                 }
                 break;
             case "ArrowUp":
                 if(fluxAngle < Math.PI)
-                    fluxAngle += 0.05;
+                    fluxAngle += FLUX_INCREMENT;
                 else
                     fluxAngle = Math.PI;
                 break;
             case "ArrowDown":
                 if(fluxAngle > -Math.PI)
-                    fluxAngle -= 0.05;
+                    fluxAngle -= FLUX_INCREMENT;
                 else
                     fluxAngle = -Math.PI;
                 break;
             case "ArrowLeft":
-                velocityAngle += 0.05;
+                velocityAngle += ANGLE_INCREMENT;
                 break;
             case "ArrowRight":
-                velocityAngle -= 0.05;
+                velocityAngle -= ANGLE_INCREMENT;
                 break;
             case 'q':
-                if(minLife<19 && minLife<maxLife){
+                if(minLife<MAX_MINLIFE && minLife<maxLife){
                     minLife++;
                     console.log(minLife)
                 }
                 break;
             case 'a':
-                if(minLife>1 && minLife<=maxLife){
+                if(minLife>MIN_MINLIFE && minLife<=maxLife){
                     minLife--;
                     console.log(minLife)
                 }
                 break;
             case 'w':
-                if(maxLife<20 && minLife<=maxLife){
+                if(maxLife<MAX_MAXLIFE && minLife<=maxLife){
                     maxLife++;
                     console.log(maxLife)
                 }
                 break;
             case 's':
-                if(maxLife>2 && minLife<maxLife){
+                if(maxLife>MIN_MAXLIFE && minLife<maxLife){
                      maxLife--;
                      console.log(maxLife)
                 }

@@ -48,34 +48,40 @@ highp float rand(vec2 co)
 
 void main() {
 
-   /* Update parameters according to our simple rules.*/
-   vPositionOut = vPosition + vVelocity * uDeltaTime;
-   vAgeOut = vAge + uDeltaTime;
-   vLifeOut = vLife;
+    /* Update parameters according to our simple rules.*/
+    vPositionOut = vPosition + vVelocity * uDeltaTime;
 
-   vec2 finalForce = vec2(0.0, 0.0);
+
+    vAgeOut = vAge + uDeltaTime;
+    vLifeOut = vLife;
+
+    vec2 finalForce = vec2(0.0, 0.0);
     highp int index = int(uCurrentPlanets);
     for(int i=0; i<MAX_PLANETS; i++) {
         if(i >= index) break;
         float m2 = (4.0 * pi * pow(uPlanetsR[i]*Rc, 3.0) * p) / 3.0;
         float dist = sqrt(pow(uPlanetsPos[i].x - vPosition.x, 2.0) + pow(uPlanetsPos[i].y - vPosition.y, 2.0)) * Rc;
         float force = (g * m1 * m2) / pow(dist, 2.0);
-        force = force/300.0;
         float angle = atan(uPlanetsPos[i].y - vPosition.y, uPlanetsPos[i].x - vPosition.x);
-        finalForce += vec2(force*cos(angle), force*sin(angle)); //*(atan(fPlanetsPos[i].x, fPlanetsPos[i].y)/pi);
+        finalForce += vec2(force*cos(angle), force*sin(angle));
+
+        if(dist/Rc < uPlanetsR[i]) {
+            vAgeOut = vLife+1.0;
+            break;
+        }
     }
 
-   vec2 accel = finalForce*m1;
-   vVelocityOut = vVelocity + accel * uDeltaTime;
-      
-   if (vAgeOut > vLife) {
-      vPositionOut = spawnPosition;
-      vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
-      vAgeOut = 0.0;
+    vec2 accel = finalForce*m1;
+    vVelocityOut = vVelocity + accel * uDeltaTime;
 
-      float angle = (2.0*rand( vVelocity * uDeltaTime) * uFluxAngle) - uFluxAngle;//(atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
-      float vel = rand(vPosition* vVelocity * uDeltaTime) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
-      vVelocityOut.x = vel*cos(angle + uVelocityAngle);
-      vVelocityOut.y = vel*sin(angle + uVelocityAngle);
+    if (vAgeOut > vLife) {
+        vPositionOut = spawnPosition;
+        vLifeOut = rand(vPosition * vVelocity / uDeltaTime) * (uMaxLife-uMinLife) + uMinLife;
+        vAgeOut = 0.0;
+
+        float angle = (2.0*rand( vVelocity / uDeltaTime) * uFluxAngle) - uFluxAngle;
+        float vel = rand(vPosition / vVelocity * uDeltaTime) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
+        vVelocityOut.x = vel*cos(angle + uVelocityAngle);
+        vVelocityOut.y = vel*sin(angle + uVelocityAngle);
    }
 }
