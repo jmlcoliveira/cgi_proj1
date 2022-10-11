@@ -267,7 +267,6 @@ function main(shaders)
         if(drawField) drawQuad();
         updateParticles(deltaTime);
         if(drawPoints) drawParticles(outParticlesBuffer, N_PARTICLES);
-        //drawPlanets(planetBuffer, N_VERTICES * currentPlanets);
 
         swapParticlesBuffers();
     }
@@ -381,20 +380,7 @@ function main(shaders)
 
         gl.drawArrays(gl.POINTS, 0, nParticles);
     }
-/*
-    function drawPlanets(buffer, nPlanets){
-         gl.useProgram(fieldProgram);
 
-         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
-         const vPosition = gl.getAttribLocation(fieldProgram, "vPosition");
-         const vRadius = gl.getAttribLocation(fieldProgram, "vRadius");
-
-         gl.bufferData(gl.ARRAY_BUFFER, flatten(planets), gl.STATIC_DRAW);
-         gl.vertexAttribPointer(vPosition, 1, gl.FLOAT, false, 0, 0);
-         gl.drawArrays(gl.LINE_LOOP, 0, nPlanets);
-    }
-*/
     function randomNumBetween(min, max) {
         return Math.random()*(max-min) + min;
     }

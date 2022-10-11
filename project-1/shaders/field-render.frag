@@ -1,7 +1,7 @@
 precision highp float;
 
-const float FIELD_OPACITY_MULTIPLIER = 0.01;
-const float LINE_INTERVAL = 1.1;
+const float FIELD_OPACITY_MULTIPLIER = 0.00001;
+const float LINE_INTERVAL = 0.6;
 const int MAX_PLANETS = 10;
 const float pi = 3.14159265359;
 const float g = 00000000000.667;
@@ -31,7 +31,7 @@ void main() {
         if(i >= index) break;
 
         float dist = sqrt(pow(fPlanetsPos[i].x - fPosition.x, 2.0) + pow(fPlanetsPos[i].y - fPosition.y, 2.0));
-        if(dist < fPlanetsR[i]) {
+        if(dist < 0.005) {
             gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
             return;
         }
@@ -46,7 +46,7 @@ void main() {
     float finalAngle = atan(finalForce.y, finalForce.x);
     float finalForceIntensity = finalForce.x*cos(finalAngle) + finalForce.y*sin(finalAngle);
     
-    if(mod(log(finalForceIntensity), LINE_INTERVAL) >= 0.0 && mod(log(finalForceIntensity), LINE_INTERVAL) <= 0.10) {
+    if(mod(log(finalForceIntensity), LINE_INTERVAL) >= 0.0 && mod(log(finalForceIntensity), LINE_INTERVAL) <= 0.08) {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     } else
         gl_FragColor = vec4(hsv2rgb(vec3(finalAngle/(2.0*pi), 1.0, 1.0)), mix(0.0, 1.0, abs(finalForceIntensity)*FIELD_OPACITY_MULTIPLIER));
