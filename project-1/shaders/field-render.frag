@@ -9,11 +9,11 @@ const float p = 5510.0;
 const float Rc = 6371000.0;
 const float m1 = 1.0;
 
-varying vec2 fPosition;
-varying vec2 fPlanetsPos[MAX_PLANETS];
-varying float fPlanetsR[MAX_PLANETS];
-varying float fCurrentPlanets;
+uniform vec2 uPlanetsPos[MAX_PLANETS];
+uniform float uPlanetsR[MAX_PLANETS];
+uniform float uCurrentPlanets;
 
+varying vec2 fPosition;
 
 vec3 hsv2rgb(vec3 c)
 {
@@ -24,21 +24,21 @@ vec3 hsv2rgb(vec3 c)
 
 void main() {
     vec2 finalForce = vec2(0.0, 0.0);
-    highp int index = int(fCurrentPlanets);
+    highp int index = int(uCurrentPlanets);
     bool temp = false;
 
     for(int i=0; i<MAX_PLANETS; i++) {
         if(i >= index) break;
 
-        float dist = sqrt(pow(fPlanetsPos[i].x - fPosition.x, 2.0) + pow(fPlanetsPos[i].y - fPosition.y, 2.0));
+        float dist = sqrt(pow(uPlanetsPos[i].x - fPosition.x, 2.0) + pow(uPlanetsPos[i].y - fPosition.y, 2.0));
         if(dist < 0.005) {
             gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
             return;
         }
 
-        float m2 = (4.0 * pi * pow(fPlanetsR[i], 3.0) * p) / 3.0;
+        float m2 = (4.0 * pi * pow(uPlanetsR[i], 3.0) * p) / 3.0;
         float force = (g * m1 * m2) / pow(dist, 2.0);
-        float angle = atan(fPlanetsPos[i].y - fPosition.y, fPlanetsPos[i].x - fPosition.x);
+        float angle = atan(uPlanetsPos[i].y - fPosition.y, uPlanetsPos[i].x - fPosition.x);
         vec2 currentForce = vec2(force*cos(angle), force*sin(angle));
         finalForce += currentForce;
     }
