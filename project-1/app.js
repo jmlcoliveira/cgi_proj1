@@ -153,11 +153,9 @@ function main(shaders)
     canvas.addEventListener("mousedown", function(event) {
         if(currentPlanets < MAX_PLANETS && !event.shiftKey){
             let p = getCursorPosition(canvas, event);
-            console.log(p);
-            p[0] = p[0]*xScale;
-            p[1] = p[1]*yScale;
+            //p[0] = p[0]*xScale;
+            //p[1] = p[1]*yScale;
             planetsPos.push(p);
-            console.log(p);
             mouseDown = 1;
             planetsR[currentPlanets] = Math.hypot(planetsPos[currentPlanets][1] - p[1], planetsPos[currentPlanets][0] - p[0]);
             currentPlanets++;
@@ -167,8 +165,8 @@ function main(shaders)
     canvas.addEventListener("mousemove", function(event) {
         let p = getCursorPosition(canvas, event);
         const spawnPosition = gl.getUniformLocation(updateProgram, "spawnPosition");
-        p[0] = p[0]*xScale;
-        p[1] = p[1]*yScale;
+        //p[0] = p[0]*xScale;
+        //p[1] = p[1]*yScale;
         if(event.shiftKey) {
             gl.useProgram(updateProgram);
             gl.uniform2fv(spawnPosition, p);
@@ -280,6 +278,7 @@ function main(shaders)
         const uVelocityAngle = gl.getUniformLocation(updateProgram, "uVelocityAngle");
         const uFluxAngle = gl.getUniformLocation(updateProgram, "uFluxAngle");
         const uCurrentPlanets = gl.getUniformLocation(updateProgram, "uCurrentPlanets");
+        const uScale = gl.getUniformLocation(updateProgram, "uScale");
 
         gl.useProgram(updateProgram);
 
@@ -291,6 +290,7 @@ function main(shaders)
         gl.uniform1f(uVelocityAngle, velocityAngle);
         gl.uniform1f(uFluxAngle, fluxAngle);
         gl.uniform1f(uCurrentPlanets, currentPlanets)
+        gl.uniform2f(uScale, xScale, yScale);
 
         for(let i=0; i<currentPlanets; i++) {
             const uPlanetsPos = gl.getUniformLocation(updateProgram, "uPlanetsPos[" + i + "]");

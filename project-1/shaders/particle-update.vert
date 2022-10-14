@@ -23,6 +23,7 @@ uniform float uMaxVelocity;
 uniform float uMinVelocity;
 uniform float uVelocityAngle;
 uniform float uFluxAngle;
+uniform vec2 uScale;
 
 attribute vec2 vPosition;              // actual position
 attribute float vAge;                  // actual age (in seconds)
@@ -47,7 +48,7 @@ highp float rand(vec2 co)
 }
 
 void respawn(){
-   vPositionOut = spawnPosition;
+   vPositionOut = spawnPosition*uScale;
    vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
    vAgeOut = 0.0;
 
@@ -60,20 +61,23 @@ void respawn(){
 vec2 calcAccel(){
    vec2 finalForce = vec2(0.0, 0.0);
     highp int index = int(uCurrentPlanets);
+    vec2 uPlanetsPosAux[MAX_PLANETS];
+
     for(int i=0; i<MAX_PLANETS; i++) {
-        if(i >= index) break;
-        float dist = distance(uPlanetsPos[i], vPosition) * Rc;
-        float r = uPlanetsR[i]*Rc;
-        /*if(dist < r)
-         r = dist;*/
-        float m2 = (4.0 * pi * pow(r, 3.0) * p) / 3.0;
-        float force = (g * m1 * m2) / pow(dist, 2.0);
-        vec2 n = normalize(vec2(uPlanetsPos[i].x - vPosition.x, uPlanetsPos[i].y - vPosition.y));
-        finalForce += force * n *0.003;
-        /*float angle = atan(uPlanetsPos[i].y - vPosition.y, uPlanetsPos[i].x - vPosition.x);
-        finalForce += vec2(force*cos(angle), force*sin(angle));*/
+      if(i >= index) break;
+      uPlanetsPosAux[i] = uPlanetsPos[i]*uScale;
+
+      float dist = distance(uPlanetsPosAux[i], vPosition) * Rc;
+      float r = uPlanetsR[i]*Rc;
+      if(dist < r)
+         r = dist;
+
+      float m2 = (4.0 * pi * pow(r, 3.0) * p) / 3.0;
+      float force = (g * m1 * m2) / pow(dist, 2.0);
+      float angle = atan(uPlanetsPosAux[i].y - vPosition.y, uPlanetsPosAux[i].x - vPosition.x);
+      finalForce += vec2(force*cos(angle), force*sin(angle));
     }
-    return finalForce*m1;
+    return finalForce/m1;
 }
 
 void main() {
