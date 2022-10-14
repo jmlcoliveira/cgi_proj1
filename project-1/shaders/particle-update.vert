@@ -46,6 +46,36 @@ highp float rand(vec2 co)
     return fract(sin(sn) * c);
 }
 
+void respawn(){
+   vPositionOut = spawnPosition;
+   vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
+   vAgeOut = 0.0;
+
+   float angle = (2.0*rand( vVelocity * uDeltaTime) * uFluxAngle) - uFluxAngle;
+   float vel = rand(vPosition* vVelocity * uDeltaTime) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
+   vVelocityOut.x = vel*cos(angle + uVelocityAngle);
+   vVelocityOut.y = vel*sin(angle + uVelocityAngle);
+}
+
+vec2 calcAccel(){
+   vec2 finalForce = vec2(0.0, 0.0);
+    highp int index = int(uCurrentPlanets);
+    for(int i=0; i<MAX_PLANETS; i++) {
+        if(i >= index) break;
+        float dist = distance(uPlanetsPos[i], vPosition) * Rc;
+        float r = uPlanetsR[i]*Rc;
+        /*if(dist < r)
+         r = dist;*/
+        float m2 = (4.0 * pi * pow(r, 3.0) * p) / 3.0;
+        float force = (g * m1 * m2) / pow(dist, 2.0);
+        vec2 n = normalize(vec2(uPlanetsPos[i].x - vPosition.x, uPlanetsPos[i].y - vPosition.y));
+        finalForce += force * n *0.003;
+        /*float angle = atan(uPlanetsPos[i].y - vPosition.y, uPlanetsPos[i].x - vPosition.x);
+        finalForce += vec2(force*cos(angle), force*sin(angle));*/
+    }
+    return finalForce*m1;
+}
+
 void main() {
 
    /* Update parameters according to our simple rules.*/
@@ -53,29 +83,10 @@ void main() {
    vAgeOut = vAge + uDeltaTime;
    vLifeOut = vLife;
 
-   vec2 finalForce = vec2(0.0, 0.0);
-    highp int index = int(uCurrentPlanets);
-    for(int i=0; i<MAX_PLANETS; i++) {
-        if(i >= index) break;
-        float m2 = (4.0 * pi * pow(uPlanetsR[i]*Rc, 3.0) * p) / 3.0;
-        float dist = sqrt(pow(uPlanetsPos[i].x - vPosition.x, 2.0) + pow(uPlanetsPos[i].y - vPosition.y, 2.0)) * Rc;
-        float force = (g * m1 * m2) / pow(dist, 2.0);
-        force = force/300.0;
-        float angle = atan(uPlanetsPos[i].y - vPosition.y, uPlanetsPos[i].x - vPosition.x);
-        finalForce += vec2(force*cos(angle), force*sin(angle)); //*(atan(fPlanetsPos[i].x, fPlanetsPos[i].y)/pi);
-    }
-
-   vec2 accel = finalForce*m1;
+   vec2 accel = calcAccel();
    vVelocityOut = vVelocity + accel * uDeltaTime;
       
    if (vAgeOut > vLife) {
-      vPositionOut = spawnPosition;
-      vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
-      vAgeOut = 0.0;
-
-      float angle = (2.0*rand( vVelocity * uDeltaTime) * uFluxAngle) - uFluxAngle;//(atan(vVelocity.x, vVelocity.y) /*[-PI e PI]*/ * uFluxAngle) / pi;
-      float vel = rand(vPosition* vVelocity * uDeltaTime) * (uMaxVelocity-uMinVelocity) + uMinVelocity;
-      vVelocityOut.x = vel*cos(angle + uVelocityAngle);
-      vVelocityOut.y = vel*sin(angle + uVelocityAngle);
+      respawn();
    }
 }
