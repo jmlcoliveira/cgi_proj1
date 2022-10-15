@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from '../../libs/utils.js';
-import { vec2, flatten, subtract, dot} from '../../libs/MV.js';
+import { vec2, flatten } from '../../libs/MV.js';
 
 // Buffers: particles before update, particles after update, quad vertices
 let inParticlesBuffer, outParticlesBuffer, quadBuffer;
@@ -15,7 +15,7 @@ const MAX_MINLIFE = 19;
 const VELOCITY_INCREMENT = 0.01;
 const FLUX_INCREMENT = 0.02;
 const ANGLE_INCREMENT = 0.05;
-const xScale = 1.5;
+const X_SCALE = 1.5;
 let yScale = 0.0;
 
 let drawPoints = true;
@@ -34,9 +34,10 @@ let fluxAngle = Math.PI;
 
 const MAX_PLANETS = 10;
 let currentPlanets = 0;
-let mouseDown = 0;
+let mouseDown = false;
 let planetsPos = [];
 let planetsR = [];
+let planetsType = [];
 
 
 function main(shaders)
@@ -47,7 +48,7 @@ function main(shaders)
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    yScale = xScale * canvas.height/canvas.width;
+    yScale = X_SCALE * canvas.height/canvas.width;
 
     /** type {WebGL2RenderingContext} */
     const gl = setupWebGL(canvas, {alpha: true});
@@ -64,15 +65,13 @@ function main(shaders)
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); 
 
-    //planetBuffer = gl.createBuffer();
-
     buildQuad();
     buildParticleSystem(N_PARTICLES);
 
     window.addEventListener("resize", function(event) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        yScale = xScale * canvas.height/canvas.width;
+        yScale = X_SCALE * canvas.height/canvas.width;
         gl.viewport(0,0,canvas.width, canvas.height);
     });
 
@@ -80,22 +79,16 @@ function main(shaders)
         console.log(event.key);
         switch(event.key) {
             case "PageUp":
-                if(event.shiftKey && minVelocity+VELOCITY_INCREMENT<maxVelocity) {
+                if(event.shiftKey && minVelocity+VELOCITY_INCREMENT<maxVelocity) 
                     minVelocity +=  VELOCITY_INCREMENT;
-                    console.log("minV: %f", minVelocity)
-                } else if(!event.shiftKey) {
+                 else if(!event.shiftKey) 
                     maxVelocity += VELOCITY_INCREMENT;
-                    console.log("maxV: %f", maxVelocity)
-                }
                 break;
             case "PageDown":
-                if(event.shiftKey && minVelocity>=VELOCITY_INCREMENT) {
+                if(event.shiftKey && minVelocity>=VELOCITY_INCREMENT)
                     minVelocity -= VELOCITY_INCREMENT;
-                    console.log("minV: %f", minVelocity)
-                } else if(!event.shiftKey && minVelocity<maxVelocity-VELOCITY_INCREMENT) {
+                else if(!event.shiftKey && minVelocity<maxVelocity-VELOCITY_INCREMENT)
                     maxVelocity -= VELOCITY_INCREMENT;
-                    console.log("maxV: %f", maxVelocity)
-                }
                 break;
             case "ArrowUp":
                 if(fluxAngle < Math.PI)
@@ -116,28 +109,20 @@ function main(shaders)
                 velocityAngle -= ANGLE_INCREMENT;
                 break;
             case 'q':
-                if(minLife<MAX_MINLIFE && minLife<maxLife){
+                if(minLife<MAX_MINLIFE && minLife<maxLife)
                     minLife++;
-                    console.log(minLife)
-                }
                 break;
             case 'a':
-                if(minLife>MIN_MINLIFE && minLife<=maxLife){
+                if(minLife>MIN_MINLIFE && minLife<=maxLife)
                     minLife--;
-                    console.log(minLife)
-                }
                 break;
             case 'w':
-                if(maxLife<MAX_MAXLIFE && minLife<=maxLife){
+                if(maxLife<MAX_MAXLIFE && minLife<=maxLife)
                     maxLife++;
-                    console.log(maxLife)
-                }
                 break;
             case 's':
-                if(maxLife>MIN_MAXLIFE && minLife<maxLife){
+                if(maxLife>MIN_MAXLIFE && minLife<maxLife)
                      maxLife--;
-                     console.log(maxLife)
-                }
                 break;
             case '0':
                 drawField = !drawField;
@@ -147,40 +132,57 @@ function main(shaders)
                 break; 
             case 'Shift':
                 break;
+            case 'Backspace':
+                if(!mouseDown)
+                    deleteMostRecentPlanet();
+                break;
         }
     })
     
     canvas.addEventListener("mousedown", function(event) {
-        if(currentPlanets < MAX_PLANETS && !event.shiftKey){
-            let p = getCursorPosition(canvas, event);
-            //p[0] = p[0]*xScale;
-            //p[1] = p[1]*yScale;
-            planetsPos.push(p);
-            mouseDown = 1;
-            planetsR[currentPlanets] = Math.hypot(planetsPos[currentPlanets][1] - p[1], planetsPos[currentPlanets][0] - p[0]);
-            currentPlanets++;
-        }
+        initializePlanet(event);
     });
 
     canvas.addEventListener("mousemove", function(event) {
         let p = getCursorPosition(canvas, event);
-        const spawnPosition = gl.getUniformLocation(updateProgram, "spawnPosition");
-        //p[0] = p[0]*xScale;
-        //p[1] = p[1]*yScale;
+        const uSpawnPosition = gl.getUniformLocation(updateProgram, "uSpawnPosition");
         if(event.shiftKey) {
             gl.useProgram(updateProgram);
-            gl.uniform2fv(spawnPosition, p);
+            gl.uniform2fv(uSpawnPosition, p);
         }
-        else if(mouseDown == 1 && currentPlanets-1 < MAX_PLANETS){
+        else if(mouseDown && currentPlanets-1 < MAX_PLANETS){
             planetsR[currentPlanets-1] = Math.hypot(planetsPos[currentPlanets-1][1] - p[1], planetsPos[currentPlanets-1][0] - p[0]);
         }
     });
 
     canvas.addEventListener("mouseup", function(event) {
-        mouseDown = 0;
+        mouseDown = false;
         }
     )
 
+    function initializePlanet(event){
+        if(currentPlanets < MAX_PLANETS && !event.shiftKey){
+            let p = getCursorPosition(canvas, event);
+            planetsPos.push(p);
+            mouseDown = true;
+            planetsR[currentPlanets] = Math.hypot(planetsPos[currentPlanets][1] - p[1], planetsPos[currentPlanets][0] - p[0]);
+            event.ctrlKey ? planetsType.push(-1.0) : planetsType.push(1.0);
+            currentPlanets++;
+        }
+    }
+
+    function deleteMostRecentPlanet(){
+        if(currentPlanets == 0)
+        {
+            alert("No more planets to delete!");
+        }
+        else{
+            currentPlanets--;
+            planetsPos.pop();
+            planetsR.pop();
+            planetsType.pop();
+        }
+    }
     
     function getCursorPosition(canvas, event) {
         const mx = event.offsetX;
@@ -208,7 +210,7 @@ function main(shaders)
 
         for(let i=0; i<nParticles; ++i) {
             // position
-            let x = (2.0*Math.random()-1)*xScale;
+            let x = (2.0*Math.random()-1)*X_SCALE;
             let y = (2.0*Math.random()-1)*yScale;
 
             data.push(x); data.push(y);
@@ -290,13 +292,16 @@ function main(shaders)
         gl.uniform1f(uVelocityAngle, velocityAngle);
         gl.uniform1f(uFluxAngle, fluxAngle);
         gl.uniform1f(uCurrentPlanets, currentPlanets)
-        gl.uniform2f(uScale, xScale, yScale);
+        gl.uniform2f(uScale, X_SCALE, yScale);
 
+        //send planets information to uniform
         for(let i=0; i<currentPlanets; i++) {
             const uPlanetsPos = gl.getUniformLocation(updateProgram, "uPlanetsPos[" + i + "]");
             const uPlanetsR = gl.getUniformLocation(updateProgram, "uPlanetsR[" + i + "]");
+            const uPlanetsType = gl.getUniformLocation(updateProgram, "uPlanetsType[" + i + "]");
             gl.uniform2fv(uPlanetsPos, planetsPos[i]);
             gl.uniform1f(uPlanetsR, planetsR[i]);
+            gl.uniform1f(uPlanetsType, planetsType[i]);
         }
 
         // Setup attributes
@@ -340,14 +345,18 @@ function main(shaders)
 
         gl.useProgram(fieldProgram);
 
-        gl.uniform2fv(uScale, vec2(xScale, yScale));
+        gl.uniform2fv(uScale, vec2(X_SCALE, yScale));
         gl.uniform1f(uCurrentPlanets, currentPlanets)
 
+        //send planets information to uniform
         for(let i=0; i<currentPlanets; i++) {
             const uPlanetsPos = gl.getUniformLocation(fieldProgram, "uPlanetsPos[" + i + "]");
             const uPlanetsR = gl.getUniformLocation(fieldProgram, "uPlanetsR[" + i + "]");
+            const uPlanetsType =  gl.getUniformLocation(fieldProgram, "uPlanetsType[" + i + "]");
+
             gl.uniform2fv(uPlanetsPos, planetsPos[i]);
-            gl.uniform1f(uPlanetsR, planetsR[i]);
+            gl.uniform1f(uPlanetsR, planetsR[i]); 
+            gl.uniform1f(uPlanetsType, planetsType[i]);
         }
 
         // Setup attributes
@@ -366,7 +375,7 @@ function main(shaders)
 
         gl.useProgram(renderProgram);
 
-        gl.uniform2fv(uScale, vec2(xScale, yScale));
+        gl.uniform2fv(uScale, vec2(X_SCALE, yScale));
 
         // Setup attributes
         const vPosition = gl.getAttribLocation(renderProgram, "vPosition");
@@ -379,6 +388,12 @@ function main(shaders)
         gl.drawArrays(gl.POINTS, 0, nParticles);
     }
 
+    /**
+     * Returns a random number between max (inclusive) and min (inclusive)
+     * @param {*} min min value
+     * @param {*} max min value
+     * @returns a random number between max (inclusive) and min (inclusive)
+     */
     function randomNumBetween(min, max) {
         return Math.random()*(max-min) + min;
     }

@@ -12,18 +12,20 @@ const float p = 5510.0;
 const float Rc = 6371000.0;
 const float m1 = 1.0;
 
+uniform vec2 uScale;                   //X and Y scale
+
 uniform vec2 uPlanetsPos[MAX_PLANETS];
 uniform float uPlanetsR[MAX_PLANETS];
+uniform float uPlanetsType[MAX_PLANETS]; //1.0 if attracts, -1.0 if repels
 uniform float uCurrentPlanets; 
 
-uniform vec2 spawnPosition;
+uniform vec2 uSpawnPosition;
 uniform float uMaxLife;
 uniform float uMinLife;
 uniform float uMaxVelocity;
 uniform float uMinVelocity;
 uniform float uVelocityAngle;
 uniform float uFluxAngle;
-uniform vec2 uScale;
 
 attribute vec2 vPosition;              // actual position
 attribute float vAge;                  // actual age (in seconds)
@@ -36,7 +38,8 @@ varying float vAgeOut;
 varying float vLifeOut;
 varying vec2 vVelocityOut;
 
-// generates a pseudo random number that is a function of the argument. The argument needs to be constantly changing from call to call to generate different results
+// generates a pseudo random number that is a function of the argument. 
+//The argument needs to be constantly changing from call to call to generate different results
 highp float rand(vec2 co)
 {
     highp float a = 12.9898;
@@ -47,8 +50,9 @@ highp float rand(vec2 co)
     return fract(sin(sn) * c);
 }
 
+//chnage particle postion to the spawn postion, generate random life and velocity
 void respawn(){
-   vPositionOut = spawnPosition*uScale;
+   vPositionOut = uSpawnPosition*uScale;
    vLifeOut = rand(vPosition) * (uMaxLife-uMinLife) + uMinLife;
    vAgeOut = 0.0;
 
@@ -58,6 +62,7 @@ void respawn(){
    vVelocityOut.y = vel*sin(angle + uVelocityAngle);
 }
 
+//calculate acceleration created by the gravitic field(s) of the planet(s)
 vec2 calcAccel(){
    vec2 finalForce = vec2(0.0, 0.0);
     highp int index = int(uCurrentPlanets);
@@ -75,9 +80,9 @@ vec2 calcAccel(){
       float m2 = (4.0 * pi * pow(r, 3.0) * p) / 3.0;
       float force = (g * m1 * m2) / pow(dist, 2.0);
       float angle = atan(uPlanetsPosAux[i].y - vPosition.y, uPlanetsPosAux[i].x - vPosition.x);
-      finalForce += vec2(force*cos(angle), force*sin(angle));
+      finalForce += vec2(force*cos(angle), force*sin(angle)) * uPlanetsType[i];
     }
-    return finalForce/m1;
+      return finalForce/m1;
 }
 
 void main() {
