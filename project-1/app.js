@@ -45,6 +45,7 @@ function main(shaders)
     // Generate the canvas element to fill the entire page
     const canvas = document.createElement("canvas");
     document.body.appendChild(canvas);
+    updateLabels();
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -137,10 +138,13 @@ function main(shaders)
                     deleteMostRecentPlanet();
                 break;
         }
+        updateLabels();
     })
     
     canvas.addEventListener("mousedown", function(event) {
-        initializePlanet(event);
+        if(!event.shiftKey)
+            initializePlanet(event);
+        updateLabels();
     });
 
     canvas.addEventListener("mousemove", function(event) {
@@ -161,7 +165,7 @@ function main(shaders)
     )
 
     function initializePlanet(event){
-        if(currentPlanets < MAX_PLANETS && !event.shiftKey){
+        if(currentPlanets < MAX_PLANETS){
             let p = getCursorPosition(canvas, event);
             planetsPos.push(p);
             mouseDown = true;
@@ -169,6 +173,8 @@ function main(shaders)
             event.ctrlKey ? planetsType.push(-1.0) : planetsType.push(1.0);
             currentPlanets++;
         }
+        else
+            alert("Maximum number of planets added!");
     }
 
     function deleteMostRecentPlanet(){
@@ -396,6 +402,15 @@ function main(shaders)
      */
     function randomNumBetween(min, max) {
         return Math.random()*(max-min) + min;
+
+    }
+
+    function updateLabels(){
+        document.getElementById('nPlanets').innerHTML = currentPlanets;
+        document.getElementById('minVel').innerHTML = minVelocity.toFixed(2);
+        document.getElementById('maxVel').innerHTML = maxVelocity.toFixed(2);
+        document.getElementById('minLife').innerHTML = minLife;
+        document.getElementById('maxLife').innerHTML = maxLife;
     }
 }
 

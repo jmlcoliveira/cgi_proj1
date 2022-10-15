@@ -6,3 +6,17 @@ html, body {
     overflow: hidden; /*  Disable scrollbars */
     display: block;  /* No floating content on sides */
 }
+
+.infobox{
+    width:200px;
+    height:190px;
+    border:1px solid #000;
+    position: fixed;
+    top: 20px;
+    left: 10px;
+    right: 10px;
+    background: rgba(43, 40, 40, 0.8);
+    border-radius: 2.5ch;
+    text-align: center;
+    color:white;
+}
